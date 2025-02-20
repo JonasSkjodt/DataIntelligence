@@ -17,26 +17,16 @@ describe = df.describe()
 
 #print(head)
 
-####
-# try to visualize the number of sightings by shape
-####
+########## isualize the number of sightings by shape ##########
 
-# .dropna drops the missing values
-# .astype('category') is used to convert the column to a categorical type
-# .value_counts() is used to count the number of sightings by shape
-# .plot.bar() is used to plot the bar chart
-# df["shape"].dropna().astype('category').value_counts().plot.bar()
-
-# .fillna fills the missing values with unknown
 # plot the visualization
 # df["shape"].fillna("not sighted").astype("category").value_counts().plot.bar()
 
 # Displays the plot
 # plt.show()
 
-####
-#  world map test
-####
+########## where are all the ufo sightings on a world map ##########
+
 # what are the columns actually called??
 # print(df.columns)
 
@@ -79,35 +69,48 @@ def convert_float(string):
     except ValueError:
       return None
 
-
-
 # print(df.columns)
 
 # Index(['datetime', 'city', 'state', 'country', 'shape', 'duration (seconds)',
 #        'duration (hours/min)', 'comments', 'date posted', 'latitude',
 #        'longitude '],
 
-# how long is the average ufo sighting // answer, around 2 and a half hours per sighting
+########## how long is the average ufo sighting // answer, around 2 and a half hours per sighting ##########
 # dfmask = df["duration (seconds)"].map(convert_float).fillna(0).mean()
 # print(dfmask)
 
 
-# how long is the average ufo sighting per country
-################# Question #################
-# we've done an .apply to get the mean of the duration of the sightings per country, but how can we use .map with .fillna to achieve the same thing
+########## how long is the average ufo sighting per country ##########
 
-#dfmask = df["duration (seconds)"].map(convert_float).fillna(0)
-# dfmaskdel = dfmask["country"].dropna()
-# dfCountry = df.groupby("country")["duration (seconds)"].mean()
-# print(dfCountry)
-# wut = df.groupby("country")["duration (seconds)"].apply(lambda x: x.map(convert_float).mean())
+df["duration (seconds)"] = df["duration (seconds)"].map(convert_float).fillna(0)
+# # # another way of doing it: avgTimeByCountry = df.groupby("country")["duration (seconds)"].apply(lambda x: x.map(convert_float).mean())
+avgTimeByCountry = df.groupby("country")["duration (seconds)"].mean()
+# print(avgTimeByCountry)
 
-# wut = df.groupby("country")["duration (seconds)"]
-wut = df[["country", "duration (seconds)"]].corr()
-# wut = df.groupby(["country"]).agg({"duration (seconds)": "mean"})
-print(wut)
+########## the number of ufo sightings per country ##########
+# df["country"].value_counts().plot.bar()
+# plt.show()
 
-# the number of ufo sightings per country
-# trend time per sighting
-# trend ufo sightings over time
-# when were the dates posted compared to the datetime of the sighting
+# how many sightings per country
+# print(df["country"].fillna("unknown country").value_counts()) 
+
+########## how the hell is gb avg time 66061 sec? GB greatly outnumbers the other countries in length of UFO sightings are there any outliers? ##########
+# 
+# df.groupby("country").idxmax("gb").plot.box()
+maskGB = df["country"] == "gb"
+smalldf = df[maskGB]
+print(smalldf["duration (seconds)"].max()) # 97836000.0 seconds (over 3 years) of 1 ufo sighting
+
+########## what is the comment to the highest duration sighting ##########
+# print(df[df["duration (seconds)"] == 97836000.0])
+print(df[df["duration (seconds)"] == 97836000.0]["comments"])
+
+# print(smalldf.iloc[smalldf["duration (seconds)"].idxmax()])
+
+#print(df["duration (seconds)"].reset_index(drop=True))
+# df[maskGB]["duration (seconds)"].plot.bar()
+plt.show()
+
+########## trend time per sighting ##########
+########## trend ufo sightings over time ##########
+########## when were the dates posted compared to the datetime of the sighting ##########
