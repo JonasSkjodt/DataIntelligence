@@ -97,20 +97,36 @@ avgTimeByCountry = df.groupby("country")["duration (seconds)"].mean()
 ########## how the hell is gb avg time 66061 sec? GB greatly outnumbers the other countries in length of UFO sightings are there any outliers? ##########
 # 
 # df.groupby("country").idxmax("gb").plot.box()
+pd.set_option('display.max_colwidth', None)
 maskGB = df["country"] == "gb"
 smalldf = df[maskGB]
 print(smalldf["duration (seconds)"].max()) # 97836000.0 seconds (over 3 years) of 1 ufo sighting
 
+#########################
+# question:
+# when you have so many different outliers (change the number below to see the different outliers) then, what do you do to get a "good" data result?
+#########################
+
+# smalldf[smalldf["duration (seconds)"] < 1000.0]["duration (seconds)"].plot.box()
+# plt.show()
+
 ########## what is the comment to the highest duration sighting ##########
-# print(df[df["duration (seconds)"] == 97836000.0])
-print(df[df["duration (seconds)"] == 97836000.0]["comments"])
+# 
+# print(df[df["duration (seconds)"] == 97836000.0]) # full columns with values of that specific outlier
+# print(df[df["duration (seconds)"] == 97836000.0]["comments"]) # only the comments of that specific outlier
+df[df["duration (seconds)"] == 97836000.0]
 
-# print(smalldf.iloc[smalldf["duration (seconds)"].idxmax()])
-
-#print(df["duration (seconds)"].reset_index(drop=True))
-# df[maskGB]["duration (seconds)"].plot.bar()
-plt.show()
+########## trim the outliers from the data ##########
+import scipy.stats
+def trimmed_mean_for_gb():
+    trim_mean = lambda x, *args: scipy.stats.trim_mean(x, 0.1)
+    trim_mean.__name__ = "trim_mean"
+    return smalldf.groupby("country").agg({"duration (seconds)": [trim_mean]})
+  
+print(trimmed_mean_for_gb())
 
 ########## trend time per sighting ##########
+
 ########## trend ufo sightings over time ##########
+
 ########## when were the dates posted compared to the datetime of the sighting ##########
