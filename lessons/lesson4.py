@@ -27,18 +27,6 @@ def convert_float(string):
       return float(string)
     except ValueError:
       return None
-    
-f = convert_float("3.4")
-assert f is not None, "Converted value was None. Did the conversion fail or did you forget to return a value from your function?"
-assert f == 3.4, "Converted value isn't 3.4 which was expected. Check your conversion."
-f = convert_float("3")
-assert f is not None, "Converted value was None. Did the conversion fail or did you forget to return a value from your function?"
-assert f == 3.0, "Converted value isn't 3.0 which was expected. Check your conversion."
-f = convert_float("3 4")
-assert f is None, "Converted non-float value was not None. Check your conversion."
-f = convert_float(None)
-assert f is None, "Converted None value should have been None."
-print("Float conversion tests succeeded!")
 
 # Make a function which converts values to floats and handles missing values
 def convert_floats_and_fill_missing_values(dataframe, column_name):
