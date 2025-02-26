@@ -20,6 +20,12 @@
 # The problem was in duration (seconds) for the country us.
 # we made a variable called dfextra to handle that specific data
 
+# Questions for next time
+# can sources be cited in the exam report if common sense fails?
+# How much are you able to investigate about the subject youre getting outside of the dataset?
+# How long is the exam report actually? Can i get the trial exam or an exam report bitte
+# we've done a normal boxplot, a logarithmic boxplot, how should we do one for percentage?
+
 
 
 import pandas as pd
@@ -157,10 +163,11 @@ def show_box_for_gb_for_sightings_duration():
 
   
 # #########################
-# # question:
-# # when you have so many different outliers (change the number below to see the different outliers) then, what do you do to get a "good" data result?
-# # try logarithmic
-# # try procentage
+# question:
+# when you have so many different outliers (change the number below to see the different outliers) then, what do you do to get a "good" data result?
+# Answer, refer to common sense
+# try logarithmic
+# try procentage // why would we do procentage?
 # #########################
   # normal
   # smalldf[smalldf["duration (seconds)"] < 90000.0]["duration (seconds)"].plot.box()
@@ -186,7 +193,9 @@ def convert_less_then_zero_numbers_to_one(fl):
     return fl
   
 
-# ########## what is the comment to the highest duration sighting ##########
+##########
+# what is the comment to the highest duration sighting
+##########
 def comments_of_the_highest_duration_sighting():
     print(df[df["duration (seconds)"] == 97836000.0]) # full columns with values of that specific outlier
     print(df[df["duration (seconds)"] == 97836000.0]["comments"]) # only the comments of that specific outlier
@@ -210,7 +219,7 @@ def trimmed_mean_for_gb():
 # print(df[df["duration (seconds)"] < 9000.0]["duration (seconds)"].apply(log))
 
 
-########## Can you do things like mean on a column like country ##########
+########## Can you do things like mean on a column like country? ##########
 
 ########## trend time per sighting ##########
 
@@ -220,9 +229,13 @@ def trimmed_mean_for_gb():
 
 ########## compare more than one plots to each other ##########
 
+########## years vs seconds ##########
+
+########## Country trend to UFO shape ##########
+
 ########## did the comments become weirder over time ##########
 
-########## years vs seconds ##########
+########## are there trends in the comments which shows the same style / facets / words / descriptions of the ufos ##########
 
 
 # describe_dataset()
