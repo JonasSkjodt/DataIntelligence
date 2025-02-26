@@ -1,7 +1,26 @@
-# Column names in the dataset:
+# When answering each question, make summary statistics on each.
+
+# Summary statistics is a part of descriptive statistics that summarizes and provides the gist of
+# information about the sample data
+
+# When using summary statistics on the following answer, for instance,
+# show the ufo sightings by shape.
+# 1: make sure to answer the question based on the data
+# 2: show the data as a screenshot
+# 3: show the mean, median, standard deviation, visualizations, etc.
+
+# This particular dataset has the following column names:
 # Index(['datetime', 'city', 'state', 'country', 'shape', 'duration (seconds)',
 #         'duration (hours/min)', 'comments', 'date posted', 'latitude',
 #         'longitude '],
+
+# logarithmic problem
+# we encountered an issue with the data when converting some of the duration (seconds) to log, it became minus numbers
+# This was only a problem with the data that was 0.0, since log(0) is undefined, and for instance, log(0.00001) is -11.5 ...
+# The problem was in duration (seconds) for the country us.
+# we made a variable called dfextra to handle that specific data
+
+
 
 import pandas as pd
 import numpy as np
@@ -12,6 +31,10 @@ import matplotlib.pyplot as plt
 #testing matplotlib world map
 from mpl_toolkits.basemap import Basemap
 
+# for logaritmic
+import math
+from math import log
+
 # convert to float
 def convert_float(string):
     if string is None:
@@ -21,29 +44,46 @@ def convert_float(string):
     except ValueError:
       return None
 
+# check convert
+def check_convert(string):
+    if string is None:
+      return False
+    try:
+      return True
+    except ValueError:
+      return False
+
 # low_memory=False to avoid warnings
 df = pd.read_csv("ufo.csv", low_memory=False)
-df["duration (seconds)"] = df["duration (seconds)"].map(convert_float).fillna(0)
+# convert the duration (seconds) column to float and fill missing values with 0 (read comment below)
+dfextra = df
+df["duration (seconds)"] = df["duration (seconds)"].map(convert_float).fillna(0.00001) # it cant be 0.0, since that makes it impossible to log on it
+# bug fixing why 0.0 didnt work
+# print(df[(df["duration (seconds)"] > 0.001) & (df["duration (seconds)"] < 1.0)]["duration (seconds)"].apply(log))
 
 # get the 5 first rows (head), 5 last rows (tail) and the summary statistics (describe) of the dataset
 def describe_dataset():
   describe = df.describe()
   print("describe: \n", describe)
 
-########## isualize the number of sightings by shape ##########
+##########
+# What are are the most common UFO shape sightings?
+##########
 
 # plot the visualization
 def find_shape_in_plot():
    df["shape"].fillna("not sighted").astype("category").value_counts().plot.bar()
    plt.show()
 
-########## where are all the ufo sightings on a world map ##########
+##########
+# where are all the ufo sightings on a world map
+##########
 
 # what are the columns actually called??
 def print_columns():
     print(df.columns)
 
-# # # Remove the spaces from column names
+# Remove the spaces from column names
 def remove_spaces_from_columns():
     df.columns = df.columns.str.strip()
 
@@ -76,19 +116,25 @@ def basemap():
     # show the plot with matplotlib
     plt.show()
 
-# ########## how long is the average ufo sighting // answer, around 2 and a half hours per sighting ##########
+##########
+# how long is the average ufo sighting // answer, around 2 and a half hours per sighting
+##########
 def avg_sighting_time():
     dfmask = df["duration (seconds)"].map(convert_float).fillna(0).mean()
     print(dfmask)
 
 
-# ########## how long is the average ufo sighting per country ##########
+##########
+# how long is the average ufo sighting per country
+##########
 def average_sighting_time_per_country():
     avgTimeByCountry = df.groupby("country")["duration (seconds)"].mean()
     print(avgTimeByCountry)
 
 
-########## the number of ufo sightings per country ##########
+##########
+# the number of ufo sightings per country
+##########
 def show_sighting_foreach_country():
   df["country"].value_counts().plot.box()
   plt.show()
@@ -98,13 +144,15 @@ def show_sighting_foreach_country():
 def print_sighting_foreach_country():
   print(df["country"].fillna("unknown country").value_counts()) 
 
-# ########## how the hell is gb avg time 66061 sec? GB greatly outnumbers the other countries in length of UFO sightings are there any outliers? ##########
+##########
+# how the hell is gb avg time 66061 sec? GB greatly outnumbers the other countries in length of UFO sightings are there any outliers?
+##########
 def show_box_for_gb_for_sightings_duration():
-  # df.groupby("country").idxmax("gb").plot.box()
-  
-  maskGB = df["country"] == "gb"
-  smalldf = df[maskGB]
-  
+  dfextra["duration (seconds)"] = dfextra["duration (seconds)"].map(convert_float).fillna(1)
+  dfextra["duration (seconds)"] = dfextra["duration (seconds)"].map(convert_less_then_zero_numbers_to_one)
+  maskGB = dfextra["country"] == "gb"
+  smalldf = dfextra[maskGB]
+  print(smalldf)
   # print(smalldf["duration (seconds)"].max()) # 97836000.0 seconds (over 3 years) of 1 ufo sighting
 
   
@@ -113,12 +161,30 @@ def show_box_for_gb_for_sightings_duration():
 # # when you have so many different outliers (change the number below to see the different outliers) then, what do you do to get a "good" data result?
 # # try logarithmic
 # # try procentage
-# # check why erasing < 90000 doesnt work
 # #########################
-  smalldf[smalldf["duration (seconds)"] < 90000.0]["duration (seconds)"].plot.box()
-  # smalldf["duration (seconds)"].plot.box()
-  plt.show()
+  # normal
+  # smalldf[smalldf["duration (seconds)"] < 90000.0]["duration (seconds)"].plot.box()
+  # logarithmic
+  # smalldf[smalldf["duration (seconds)"] < 90000.0]["duration (seconds)"].apply(log).plot.box()
+  # plt.show()
+  # procentage
+  
+  countryLog = smalldf[smalldf["duration (seconds)"] < 10000000.0]["duration (seconds)"].apply(log)
+  print("log min: ", countryLog.min())
+  print("log max: ", countryLog.max())
+  print("log mean: ", countryLog.mean())
+  print("log median: ", countryLog.median())
 
+  median_duration_seconds = math.exp(countryLog.median())
+  print("The sighting duration (seconds) for the country was:", median_duration_seconds, "median seconds")
+
+# this is a helper function to convert less then zero numbers to one
+def convert_less_then_zero_numbers_to_one(fl):
+  if fl < 1.0:
+    return 1.0
+  else:
+    return fl
+  
 
 # ########## what is the comment to the highest duration sighting ##########
 def comments_of_the_highest_duration_sighting():
@@ -128,7 +194,9 @@ def comments_of_the_highest_duration_sighting():
 
 
 
-# ########## trim the outliers from the data ##########
+##########
+# trim the outliers from the data
+##########
 import scipy.stats
 def trimmed_mean_for_gb():
     trim_mean = lambda x, *args: scipy.stats.trim_mean(x, 0.1)
@@ -138,6 +206,11 @@ def trimmed_mean_for_gb():
     return smalldf.groupby("country").agg({"duration (seconds)": [trim_mean]})
 
 
+# print(df[(df["duration (seconds)"] > 0.001) & (df["duration (seconds)"] < 1.0)]["duration (seconds)"].apply(log))
+# print(df[df["duration (seconds)"] < 9000.0]["duration (seconds)"].apply(log))
+
+
+########## Can you do things like mean on a column like country ##########
 
 ########## trend time per sighting ##########
 
@@ -152,7 +225,7 @@ def trimmed_mean_for_gb():
 ########## years vs seconds ##########
 
 
-describe_dataset()
+# describe_dataset()
 
 # find_shape_in_plot()
 
@@ -172,7 +245,7 @@ describe_dataset()
 
 # print_sighting_foreach_country()
 
-# show_box_for_gb_for_sightings_duration()
+show_box_for_gb_for_sightings_duration()
 
 # comments_of_the_highest_duration_sighting()
 
