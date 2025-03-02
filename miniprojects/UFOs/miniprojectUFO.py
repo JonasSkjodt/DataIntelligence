@@ -26,8 +26,6 @@
 # How long is the exam report actually? Can i get the trial exam or an exam report bitte
 # we've done a normal boxplot, a logarithmic boxplot, how should we do one for percentage?
 
-
-
 import pandas as pd
 import numpy as np
 
@@ -223,7 +221,37 @@ def trimmed_mean_for_gb():
 
 ########## trend time per sighting ##########
 
-########## trend ufo sightings over time ##########
+########## trend ufo sightings over datetime and date posted ##########
+# Index(['datetime', 'city', 'state', 'country', 'shape', 'duration (seconds)',
+#         'duration (hours/min)', 'comments', 'date posted', 'latitude',
+#         'longitude '],
+def trend_ufo_sightings_over_datetime():
+    df["datetime"]    = pd.to_datetime(df["datetime"], errors="coerce") #should probably figure out how to handle the errors rather than ignoring them
+    df["date posted"] = pd.to_datetime(df["date posted"], errors="coerce")
+
+    # datetime
+    df["year"]   = df["datetime"].dt.year
+    df["month"]  = df["datetime"].dt.month
+    df["day"]    = df["datetime"].dt.day
+    df["hour"]   = df["datetime"].dt.hour
+    df["minute"] = df["datetime"].dt.minute
+    df["second"] = df["datetime"].dt.second
+
+    # date posted 
+    df["date posted year"]  = df["date posted"].dt.year
+    df["date posted month"] = df["date posted"].dt.month
+    df["date posted day"]   = df["date posted"].dt.day
+
+    print(df["datetime"].dt.year.value_counts().sort_index()) # takes the datetime column and then counts the values by year and then sorts them by index. dt is a datetime accessor built into pandas
+    print(df["date posted"].dt.year.value_counts().sort_index())
+
+    #print the earliest and latest sightings
+    print("Earliest sighting:", df["datetime"].min())
+    print("Latest sighting:", df["datetime"].max())
+
+    # df["datetime"].dt.year.value_counts().sort_index().plot()
+    # df["date posted"].dt.year.value_counts().sort_index().plot()
+    # plt.show()
 
 ########## when were the dates posted compared to the datetime of the sighting ##########
 
@@ -231,7 +259,20 @@ def trimmed_mean_for_gb():
 
 ########## years vs seconds ##########
 
-########## Country trend to UFO shape ##########
+########## what are the most common UFO shapes per country? ##########
+def country_trend_to_ufo_shape():
+    df["shape"] = df["shape"].fillna("not sighted")
+
+    most_seen   = df.groupby("country")["shape"].agg(lambda x: x.mode().iloc[0]) # mode() is built into pandas, it returns the most frequent values in a series apparently 
+    second_seen = df.groupby("country")["shape"].agg(lambda x: x.value_counts().index[1])
+    third_seen  = df.groupby("country")["shape"].agg(lambda x: x.value_counts().index[2])
+
+    print("Most Seen UFO Shape Per Country:")
+    print(most_seen, "\n")
+    print("Second Seen UFO Shape Per Country:")
+    print(second_seen, "\n")
+    print("Second Seen UFO Shape Per Country:")
+    print(third_seen)
 
 ########## did the comments become weirder over time ##########
 
@@ -258,8 +299,12 @@ def trimmed_mean_for_gb():
 
 # print_sighting_foreach_country()
 
-show_box_for_gb_for_sightings_duration()
+# show_box_for_gb_for_sightings_duration()
 
 # comments_of_the_highest_duration_sighting()
 
 # trimmed_mean_for_gb()
+
+# country_trend_to_ufo_shape()
+
+trend_ufo_sightings_over_datetime()

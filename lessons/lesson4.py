@@ -78,4 +78,4 @@ df["beverage-category"].value_counts().plot.bar()
 df.plot.scatter(x="sugars", y="calories")
 
 # Fill in this block to make a line plot of the values of the `Cielab b*` feature against the `year`. Remember to use the new `df_paper` variable.
-df_paper.plot(x="year", y="Cielab b*")
+# df_paper.plot(x="year", y="Cielab b*")
