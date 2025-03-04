@@ -33,7 +33,9 @@ import pandas as pd
 # visualization with seaborn
 import seaborn as sns
 
+# visualization with plotnine
 import plotnine as p9
+from plotnine import options
 
 #testing matplotlib world map
 from mpl_toolkits.basemap import Basemap
@@ -265,7 +267,14 @@ def trend_ufo_sightings_over_datetime():
     # plt.show()
 
     # plotnine
-    p9.ggplot(df) + p9.aes(x="year") + p9.geom_bar() + p9.theme_minimal()
+    p9plot = p9.ggplot(df, p9.aes(x="year")) + p9.geom_bar()
+    # print(p9plot)
+
+    # options.figure_size = (8, 6) #adjust as needed.
+    # print("Drawing plot...")
+    # p9plot.draw()
+    # print("Plot drawn.")
+    # p9plot.save("ufo_sightings_by_year.png")
 
 ########## when were the dates posted compared to the datetime of the sighting ##########
 
