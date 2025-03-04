@@ -33,6 +33,8 @@ import pandas as pd
 # visualization with seaborn
 import seaborn as sns
 
+import plotnine as p9
+
 #testing matplotlib world map
 from mpl_toolkits.basemap import Basemap
 
@@ -256,9 +258,14 @@ def trend_ufo_sightings_over_datetime():
     # df["date posted"].dt.year.value_counts().sort_index().plot()
     # plt.show()
 
-    # seaborn
+    # pandas
 
-    #plotnine
+    # seaborn
+    # sns.countplot(data=df, x="year")
+    # plt.show()
+
+    # plotnine
+    p9.ggplot(df) + p9.aes(x="year") + p9.geom_bar() + p9.theme_minimal()
 
 ########## when were the dates posted compared to the datetime of the sighting ##########
 
@@ -330,6 +337,6 @@ def comments_over_time():
 
 # country_trend_to_ufo_shape()
 
-# trend_ufo_sightings_over_datetime()
+trend_ufo_sightings_over_datetime()
 
-comments_over_time()
+#comments_over_time()
