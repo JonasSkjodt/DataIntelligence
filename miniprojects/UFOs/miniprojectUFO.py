@@ -20,17 +20,18 @@
 # The problem was in duration (seconds) for the country us.
 # we made a variable called dfextra to handle that specific data
 
-# Questions for next time
-# can sources be cited in the exam report if common sense fails?
-# How much are you able to investigate about the subject youre getting outside of the dataset?
-# How long is the exam report actually? Can i get the trial exam or an exam report bitte
-# we've done a normal boxplot, a logarithmic boxplot, how should we do one for percentage?
 
 import pandas as pd
 import numpy as np
 
 # visualization with matplotlib
 import matplotlib.pyplot as plt
+
+# data manipulation with pandas
+import pandas as pd
+
+# visualization with seaborn
+import seaborn as sns
 
 #testing matplotlib world map
 from mpl_toolkits.basemap import Basemap
@@ -173,6 +174,7 @@ def show_box_for_gb_for_sightings_duration():
   # smalldf[smalldf["duration (seconds)"] < 90000.0]["duration (seconds)"].apply(log).plot.box()
   # plt.show()
   # procentage
+  # https://www.geeksforgeeks.org/how-to-calculate-the-percentage-of-a-column-in-pandas/
   
   countryLog = smalldf[smalldf["duration (seconds)"] < 10000000.0]["duration (seconds)"].apply(log)
   print("log min: ", countryLog.min())
@@ -249,9 +251,14 @@ def trend_ufo_sightings_over_datetime():
     print("Earliest sighting:", df["datetime"].min())
     print("Latest sighting:", df["datetime"].max())
 
+    # matplotlib
     # df["datetime"].dt.year.value_counts().sort_index().plot()
     # df["date posted"].dt.year.value_counts().sort_index().plot()
     # plt.show()
+
+    # seaborn
+
+    #plotnine
 
 ########## when were the dates posted compared to the datetime of the sighting ##########
 
@@ -275,6 +282,22 @@ def country_trend_to_ufo_shape():
     print(third_seen)
 
 ########## did the comments become weirder over time ##########
+def comments_over_time():
+  df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+  df["date posted"] = pd.to_datetime(df["date posted"], errors="coerce")
+
+  # Extract year from datetime
+  df["year"] = df["datetime"].dt.year
+
+  # Group by year and concatenate comments
+  comments_by_year = df.groupby("year")["comments"].apply(lambda x: ' '.join(x.dropna()))
+
+  # Print comments by year
+  for year, comments in comments_by_year.items():
+    print(f"Year: {year}")
+    print(f"Comments: {comments[:100]}...")  # Print first 200 characters for brevity
+    print("\n")
+
 
 ########## are there trends in the comments which shows the same style / facets / words / descriptions of the ufos ##########
 
@@ -307,4 +330,6 @@ def country_trend_to_ufo_shape():
 
 # country_trend_to_ufo_shape()
 
-trend_ufo_sightings_over_datetime()
+# trend_ufo_sightings_over_datetime()
+
+comments_over_time()
