@@ -1,3 +1,16 @@
+# questions
+# when talking about modeling data via inferential statistics, does that mean stuff like regression and class...
+
+# TODOS
+# make more regression plots 
+# make more seaborn
+# make classification (we've already made some regression)
+# make more than one plot (draw the plot in another window with the same data visualized) for the same function
+# Can you do things like "mean" on a column with names and such? 
+
+
+
+# ----------------------------------------
 # When answering each question, make summary statistics on each.
 
 # Summary statistics is a part of descriptive statistics that summarizes and provides the gist of
@@ -223,10 +236,6 @@ def trimmed_mean_for_gb():
 # print(df[df["duration (seconds)"] < 9000.0]["duration (seconds)"].apply(log))
 
 
-########## Can you do things like mean on a column like country? ##########
-
-########## trend time per sighting ##########
-
 ########## trend ufo sightings over datetime and date posted ##########
 # Index(['datetime', 'city', 'state', 'country', 'shape', 'duration (seconds)',
 #         'duration (hours/min)', 'comments', 'date posted', 'latitude',
@@ -248,17 +257,17 @@ def trend_ufo_sightings_over_datetime():
     df["date posted month"] = df["date posted"].dt.month
     df["date posted day"]   = df["date posted"].dt.day
 
-    print(df["datetime"].dt.year.value_counts().sort_index()) # takes the datetime column and then counts the values by year and then sorts them by index. dt is a datetime accessor built into pandas
-    print(df["date posted"].dt.year.value_counts().sort_index())
+    # print(df["datetime"].dt.year.value_counts().sort_index()) # takes the datetime column and then counts the values by year and then sorts them by index. dt is a datetime accessor built into pandas
+    # print(df["date posted"].dt.year.value_counts().sort_index())
 
-    #print the earliest and latest sightings
-    print("Earliest sighting:", df["datetime"].min())
-    print("Latest sighting:", df["datetime"].max())
+    # #print the earliest and latest sightings
+    # print("Earliest sighting:", df["datetime"].min())
+    # print("Latest sighting:", df["datetime"].max())
 
     # matplotlib
-    # df["datetime"].dt.year.value_counts().sort_index().plot()
-    # df["date posted"].dt.year.value_counts().sort_index().plot()
-    # plt.show()
+    df["datetime"].dt.year.value_counts().sort_index().plot()
+    df["date posted"].dt.year.value_counts().sort_index().plot()
+    plt.show()
 
     # pandas
 
@@ -267,20 +276,15 @@ def trend_ufo_sightings_over_datetime():
     # plt.show()
 
     # plotnine
-    p9plot = p9.ggplot(df, p9.aes(x="year")) + p9.geom_bar()
-    # print(p9plot)
+    # p9plot = p9.ggplot(df, p9.aes(x="year")) + p9.geom_bar(fill="lightblue")
+    # # print(p9plot)
 
-    # options.figure_size = (8, 6) #adjust as needed.
+    # options.figure_size = (8, 6)
     # print("Drawing plot...")
     # p9plot.draw()
     # print("Plot drawn.")
     # p9plot.save("ufo_sightings_by_year.png")
 
-########## when were the dates posted compared to the datetime of the sighting ##########
-
-########## compare more than one plots to each other ##########
-
-########## years vs seconds ##########
 
 ########## what are the most common UFO shapes per country? ##########
 def country_trend_to_ufo_shape():
@@ -315,8 +319,109 @@ def comments_over_time():
     print("\n")
 
 
+
+
+
+# YES Continue looking at pandas methods for descriptive statistics and data handling: aggregation using .groupby, handling missing values using .fillna/.isna/.dropna
+# YES Find a couple of features in the dataset that you want to examine
+# Identify whether a regression or classification best answers your question
+# Try to model the features using inferential statistics
+# YES Evaluate how well your model explains the features
+########## Is there coming more sighting in the fellowing years in our dataset
+
+# scikit-learn is imported by the name sklearn
+import sklearn.linear_model
+import sklearn.ensemble
+import sklearn.metrics
+
+## Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
+# X:  80332
+# y:  80332
+# array.reshape(-1, 1): Reshapes a single feature into a column vector.
+# array.reshape(1, -1): Reshapes a single sample into a row vector.
+def split_data(x, y):
+   X = df[x].values.reshape(-1, 1)
+  #  y = np.asarray(df[y].value)
+   y = df[y].values
+  #  print("X: ", X)
+  #  print("y: ", len(y))
+   X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1)
+   return X_train, X_test, y_train, y_test
+
+# def split_data():
+#     df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+#     df["date posted"] = pd.to_datetime(df["date posted"], errors="coerce")
+#     df.dropna(subset=["datetime", "date posted"], inplace=True)
+    
+#     X = df["datetime"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+#     y = df["date posted"].map(pd.Timestamp.toordinal).values
+#     print("X: ", X)
+#     print("y: ", y)
+#     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1)
+#     return X_train, X_test, y_train, y_test
+
+def single_feature_linear_regression(x, y):
+    X_train, X_test, y_train, y_test = split_data(x, y)
+    model = sklearn.linear_model.LinearRegression()
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+
+    return sklearn.metrics.r2_score(y_test, preds)
+
+
+def more_sightings_in_the_following_years_with_regression():
+  trend_ufo_sightings_over_datetime()
+  # yearData = df["datetime"].dt.year.value_counts().sort_index()
+  # y = df["date posted"].dt.year.value_counts().sort_index()
+  single_feature_linear_regression("year", "date posted year")
+
+def sighting_over_datetime_plot():
+  trend_ufo_sightings_over_datetime()
+
+  yearly_counts = df["year"].value_counts().sort_index()
+
+  X = yearly_counts.index.values.reshape(-1, 1)
+  # print("idx_val: ", yearly_counts.index.values) # values is a numpy array
+  # print("just index: ", yearly_counts.index) # index is a tuple with 3 elements, values, type and name
+  y = yearly_counts.values
+
+  model = sklearn.linear_model.LinearRegression()
+  model.fit(X, y)
+  preds = model.predict(X)
+
+  r2_score = sklearn.metrics.r2_score(y, preds)
+  
+  plt.scatter(X, y, color='blue', label='Actual')
+  plt.plot(X, preds, color='red', linewidth=2, label='Predicted')
+  plt.xlabel("year")
+  plt.ylabel("number og sightings")
+  plt.title(f'Linear Regression: oirjgre')
+  plt.legend()
+  plt.ylim(0, 8000) # set the y-axis limits
+  plt.xlim(1900, 2020)
+  plt.text(1940, 7000, f"R^2 Score: {r2_score}")
+  plt.text(1940, 6000, f"coefficient: {model.coef_}")
+  plt.show()
+
+
 ########## are there trends in the comments which shows the same style / facets / words / descriptions of the ufos ##########
 
+########## ##########
+
+########## trend time per sighting ##########
+
+########## when were the dates posted compared to the datetime of the sighting ##########
+
+########## compare more than one plots to each other ##########
+
+########## years vs seconds ##########
+
+
+
+
+trend_ufo_sightings_over_datetime()
+
+# sighting_over_datetime_plot()
 
 # describe_dataset()
 
@@ -346,6 +451,9 @@ def comments_over_time():
 
 # country_trend_to_ufo_shape()
 
-trend_ufo_sightings_over_datetime()
+# trend_ufo_sightings_over_datetime()
 
 #comments_over_time()
+
+# more_sightings_in_the_following_years_with_regression()
+
