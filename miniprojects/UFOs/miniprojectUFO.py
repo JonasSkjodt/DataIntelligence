@@ -1,12 +1,16 @@
 # questions
 # when talking about modeling data via inferential statistics, does that mean stuff like regression and class...
+# I dont understand the true positive and false negitive in class... in things like recall
+# Whats the best way to do a random forest plot when doing a classification report? Can you show us an example?
+# is the decision tree even needed to show compared to the classification report?
+# Can you do things like "mean" on a column with names and such? 
+
 
 # TODOS
+# make more classification
 # make more regression plots 
 # make more seaborn
-# make classification (we've already made some regression)
 # make more than one plot (draw the plot in another window with the same data visualized) for the same function
-# Can you do things like "mean" on a column with names and such? 
 
 
 
@@ -265,14 +269,15 @@ def trend_ufo_sightings_over_datetime():
     # print("Latest sighting:", df["datetime"].max())
 
     # matplotlib
-    df["datetime"].dt.year.value_counts().sort_index().plot()
-    df["date posted"].dt.year.value_counts().sort_index().plot()
-    plt.show()
+    # df["datetime"].dt.year.value_counts().sort_index().plot()
+    # df["date posted"].dt.year.value_counts().sort_index().plot()
+    # plt.show()
 
     # pandas
 
     # seaborn
     # sns.countplot(data=df, x="year")
+    # plt.xticks(rotation=90)
     # plt.show()
 
     # plotnine
@@ -334,31 +339,24 @@ import sklearn.linear_model
 import sklearn.ensemble
 import sklearn.metrics
 
+###### REGRESSION ######
 ## Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
 # X:  80332
 # y:  80332
 # array.reshape(-1, 1): Reshapes a single feature into a column vector.
 # array.reshape(1, -1): Reshapes a single sample into a row vector.
+rng = np.random.RandomState(0)
 def split_data(x, y):
    X = df[x].values.reshape(-1, 1)
-  #  y = np.asarray(df[y].value)
    y = df[y].values
-  #  print("X: ", X)
-  #  print("y: ", len(y))
-   X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1)
+   X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1, random_state=rng)
    return X_train, X_test, y_train, y_test
-
-# def split_data():
-#     df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
-#     df["date posted"] = pd.to_datetime(df["date posted"], errors="coerce")
-#     df.dropna(subset=["datetime", "date posted"], inplace=True)
-    
-#     X = df["datetime"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-#     y = df["date posted"].map(pd.Timestamp.toordinal).values
-#     print("X: ", X)
-#     print("y: ", y)
-#     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1)
-#     return X_train, X_test, y_train, y_test
+ 
+def split_data2(x, y):
+   X = df[x].values
+   y = df[y].values
+   X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size=0.1, random_state=rng)
+   return X_train, X_test, y_train, y_test
 
 def single_feature_linear_regression(x, y):
     X_train, X_test, y_train, y_test = split_data(x, y)
@@ -371,39 +369,83 @@ def single_feature_linear_regression(x, y):
 
 def more_sightings_in_the_following_years_with_regression():
   trend_ufo_sightings_over_datetime()
-  # yearData = df["datetime"].dt.year.value_counts().sort_index()
-  # y = df["date posted"].dt.year.value_counts().sort_index()
   single_feature_linear_regression("year", "date posted year")
 
 def sighting_over_datetime_plot():
   trend_ufo_sightings_over_datetime()
 
   yearly_counts = df["year"].value_counts().sort_index()
-
   X = yearly_counts.index.values.reshape(-1, 1)
-  # print("idx_val: ", yearly_counts.index.values) # values is a numpy array
-  # print("just index: ", yearly_counts.index) # index is a tuple with 3 elements, values, type and name
   y = yearly_counts.values
-
+  
+  # this is not need for seaborn to work
   model = sklearn.linear_model.LinearRegression()
   model.fit(X, y)
   preds = model.predict(X)
-
   r2_score = sklearn.metrics.r2_score(y, preds)
-  
-  plt.scatter(X, y, color='blue', label='Actual')
-  plt.plot(X, preds, color='red', linewidth=2, label='Predicted')
-  plt.xlabel("year")
-  plt.ylabel("number og sightings")
-  plt.title(f'Linear Regression: oirjgre')
-  plt.legend()
-  plt.ylim(0, 8000) # set the y-axis limits
+
+  # seaborn
+  sns.regplot(x=X, y=y, data=df, ci=None, line_kws={"color": "red"}) # scatter_kws={"color": "black"}
+  plt.text(x=1950, y=6000, s=f"R^2 Score: {r2_score}", fontsize=10, color='red')
   plt.xlim(1900, 2020)
-  plt.text(1940, 7000, f"R^2 Score: {r2_score}")
-  plt.text(1940, 6000, f"coefficient: {model.coef_}")
+  plt.ylim(0, 8000)
+  # plt.plot([0, 4], [1.5, 0], linewidth=2)
+
+  # sklearn and matplotlib
+  # plt.scatter(X, y, color='blue', label='Actual')
+  # plt.plot(X, preds, color='red', linewidth=2, label='Predicted')
+  # plt.xlabel("year")
+  # plt.ylabel("number og sightings")
+  # plt.title(f'Linear Regression: oirjgre')
+  # plt.legend()
+  # plt.ylim(0, 8000) # set the y-axis limits
+  # plt.xlim(1900, 2020)
+  # plt.text(1940, 7000, f"R^2 Score: {r2_score}")
+  # plt.text(1940, 6000, f"coefficient: {model.coef_}")
+  
   plt.show()
 
+###### CLASSIFICATION ######
 
+from sklearn.tree import plot_tree
+
+def sightings_over_time_with_classification():
+  trend_ufo_sightings_over_datetime()
+
+  input_features = ["year"]
+  X_train, X_test, y_train, y_test = split_data2(input_features, "date posted year")
+  model = sklearn.ensemble.RandomForestClassifier(random_state=rng)
+  model.fit(X_train, y_train)
+  preds = model.predict(X_test)
+  test_report = sklearn.metrics.classification_report(y_test, preds)
+  print(test_report) # report says f1 has a weighted avg og 74%
+  feature_importances = "\n\t".join(f"{feature}: {importance:.2f}" for feature, importance in zip(input_features, model.feature_importances_))
+  print(f"Feature importances:\n\t{feature_importances}")
+
+  # trying to do a decision tree plot
+  # fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=800)
+  h = sklearn.tree.plot_tree(model.estimators_[0],
+      feature_names=["year"],
+      class_names=df["date posted year"], filled=True)
+  
+  plt.figure(figsize=(20, 10))
+  plot_tree(h, feature_names=["year"], filled=True, rounded=True, fontsize=10)
+  plt.title("Decision Tree from Random Forest")
+  plt.show()
+
+# from sklearn.tree import plot_tree
+# import matplotlib.pyplot as plt
+
+# # Assuming regressor is your trained Random Forest model
+# # Pick one tree from the forest, e.g., the first tree (index 0)
+# tree_to_plot = regressor.estimators_[0]
+
+# # Plot the decision tree
+# plt.figure(figsize=(20, 10))
+# plot_tree(tree_to_plot, feature_names=df.columns.tolist(), filled=True, rounded=True, fontsize=10)
+# plt.title("Decision Tree from Random Forest")
+# plt.show()
+  
 ########## are there trends in the comments which shows the same style / facets / words / descriptions of the ufos ##########
 
 ########## ##########
@@ -421,7 +463,7 @@ def sighting_over_datetime_plot():
 
 trend_ufo_sightings_over_datetime()
 
-# sighting_over_datetime_plot()
+sighting_over_datetime_plot()
 
 # describe_dataset()
 
@@ -451,9 +493,8 @@ trend_ufo_sightings_over_datetime()
 
 # country_trend_to_ufo_shape()
 
-# trend_ufo_sightings_over_datetime()
-
 #comments_over_time()
 
 # more_sightings_in_the_following_years_with_regression()
 
+# sightings_over_time_with_classification()
