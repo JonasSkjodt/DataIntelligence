@@ -61,6 +61,12 @@ from mpl_toolkits.basemap import Basemap
 import math
 from math import log
 
+#preprocessing
+import sklearn.preprocessing
+
+# for regex
+import re
+
 # convert to float
 def convert_float(string):
     if string is None:
@@ -458,12 +464,152 @@ def sightings_over_time_with_classification():
 
 ########## years vs seconds ##########
 
+#duration of seconds vs hours with scaling
+def scale(df):
+  scaler = sklearn.preprocessing.StandardScaler()
+  return scaler.fit_transform(df)
+
+# Function to convert time strings to seconds
+# def convert_to_seconds(time_str):
+#     if pd.isna(time_str):  # Handle NaN or None values
+#         return 0
+    
+#     # Regex to extract numeric value and unit 1/2
+#     #match = re.search(r"(\d'+|\d+\.?\d*)\s*\-?\s*(\d+\.?\d*)?\s*(hrs?|hour?s?|min(?:ute)?s?|sec(?:ond)?s?)", time_str, re.IGNORECASE)
+#     match = re.search(r"((?:\d+\/\d+|\d+(?:\.\d+)?|\d+')?)\s*\-?\s*((?:\d+\/\d+|\d+(?:\.\d+)?)?)\s*(hrs?|hour?s?|min(?:ute)?s?|sec(?:ond)?s?|hour)", time_str, re.IGNORECASE)
+#     # (|\d'+|\d+\.?\d*)\s*\-?\s*(\/?\d*\d+\.?\d*)?\s*(hrs?|hour?s?|min(?:ute)?s?|sec(?:ond)?s?) gives (1) (/2) (hours)
+#     if not match:
+#         return 0  # If no match, return 0 or handle as needed
+    
+#     # Extract numeric value and unit
+#     value1 = float(match.group(1))
+#     value2 = float(match.group(2)) if match.group(2) else value1  # Handle ranges like "1-2 hrs"
+#     unit = match.group(3).lower()  # Normalize unit to lowercase
+    
+#     # Average the range (e.g., "1-2 hrs" becomes 1.5 hrs)
+#     avg_value = (value1 + value2) / 2
+    
+#     # Convert to seconds based on unit
+#     if unit.startswith("hr"):
+#         return avg_value * 3600
+#     elif unit.startswith("min"):
+#         return avg_value * 60
+#     elif unit.startswith("sec"):
+#         return avg_value
+#     else:
+#         return 0  # Handle unknown units
+
+def convert_to_seconds2(time_str):
+    if pd.isna(time_str):  # Handle NaN or None values
+        return 0
+
+    # Regex to extract numeric value and unit, including 1/2 and "hour"
+    match = re.search(r"((?:\d+\/\d+|\d+(?:\.\d+)?|\d+')?)\s*\-?\s*((?:\d+\/\d+|\d+(?:\.\d+)?)?)\s*(hrs?|hour?s?|min(?:ute)?s?|sec(?:ond)?s?|hour)", time_str, re.IGNORECASE)
+
+    if not match:
+        return 0  # If no match, return timestamp or handle as needed
+
+    # Extract numeric value and unit
+    value1_str = match.group(1)
+    value2_str = match.group(2)
+    unit = match.group(3).lower()  # Normalize unit to lowercase
+
+    def parse_value(value_str):
+        if not value_str:
+            return float(1)
+        if '/' in value_str:
+            num, den = map(float, value_str.split('/'))
+            return num / den
+        else:
+            try:
+                return float(value_str)
+            except ValueError:
+                return None
+
+    value1 = parse_value(value1_str)
+    value2 = parse_value(value2_str) if value2_str else value1
+
+    if value1 is None:
+      return 0
+
+    # Handle if value 2 is None, if value 2 is none, then value 1 is used.
+    if value2 is None:
+        avg_value = value1
+    else:
+        avg_value = (value1 + value2) / 2
 
 
+    # hour.min sec
+    # 00.00 00
+    # 1 hour / 25 min / 02 sec
+    # "1" + "." + "25" + "02"
+    # 1.2502
+    
+    # Convert to seconds based on unit
+    if unit.startswith("hr") or unit == "hour":
+        return avg_value * 3600
+    elif unit.startswith("min"):
+        return avg_value * 60
+    elif unit.startswith("sec"):
+        return avg_value
+    else:
+        return 0  # Handle unknown units
+    
+    
+from sklearn.preprocessing import MinMaxScaler  
+def seconds_and_hours_with_scaling():
 
-trend_ufo_sightings_over_datetime()
+  df["duration (hours/min)"] = df["duration (hours/min)"]# .apply(convert_to_seconds2)
 
-sighting_over_datetime_plot()
+  #print(df["duration (seconds)"])
+  print(df["duration (hours/min)"])
+  
+
+
+def jitter_plot():
+  # Create example datasets
+  data1 = {'x': [1, 2, 3, 4, 5], 'y': [10, 20, 30, 40, 50]}  # High numbers
+  data2 = {'x': [1, 2, 3, 4, 5], 'y': [10000, 20000, 30000, 40000, 50000]}       # Low numbers
+
+  # Convert to DataFrame
+  df1 = pd.DataFrame(data1)
+  df2 = pd.DataFrame(data2)
+
+  # Normalize the y-values using MinMaxScaler
+  scaler = MinMaxScaler()
+  
+  df1['y_scaled'] = scaler.fit_transform(df1[['y']])
+  df2['y_scaled'] = scaler.fit_transform(df2[['y']])
+
+  # Add jitter to the scaled values
+  jitter_range = 0.05  # Adjust this value for more or less jitter
+  df1['y_jitter'] = df1['y_scaled'] + np.random.uniform(-jitter_range, jitter_range, size=len(df1))
+  df2['y_jitter'] = df2['y_scaled'] + np.random.uniform(-jitter_range, jitter_range, size=len(df2))
+
+
+  # Combine the data for plotting
+  df1['label'] = 'High Numbers'
+  df2['label'] = 'Low Numbers'
+
+  combined_df = pd.concat([df1, df2])
+
+  # Plot using seaborn
+  plt.figure(figsize=(8, 6))
+  sns.scatterplot(data=combined_df, x='x', y='y_jitter', hue='label', style='label', s=100)
+  
+  # Add labels and title
+  plt.title('Scatter Plots with Scaled Y-Axis', fontsize=14)
+  plt.xlabel('X-axis', fontsize=12)
+  plt.ylabel('Scaled Y-axis', fontsize=12)
+  plt.legend(title='Legend')
+  plt.show()
+ 
+print(df["duration (hours/min)"].head(60))
+
+# seconds_and_hours_with_scaling()
+# trend_ufo_sightings_over_datetime()
+
+# sighting_over_datetime_plot()
 
 # describe_dataset()
 
