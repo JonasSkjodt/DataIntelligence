@@ -2,7 +2,7 @@
 # when talking about modeling data via inferential statistics, does that mean stuff like regression and class...
 # I dont understand the true positive and false negitive in class... in things like recall
 # Whats the best way to do a random forest plot when doing a classification report? Can you show us an example?
-# is the decision tree even needed to show compared to the classification report?
+# is the decision tree even needed to visualize, compared to the classification report?
 # Can you do things like "mean" on a column with names and such? 
 
 
