@@ -1,20 +1,37 @@
+import shap
 import pandas as pd
+import numpy as np
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("Global_Cybersecurity_Threats_2015-2024.csv")
 
-
+def is_column_float(column):
+    istrue = True
+    for value in df[column]:
+        if type(value) is not float:
+            istrue = False
+    return istrue
 
 # print(df.columns)
-# Country 
-# Year
-# Attack Type
-# Target Industry
-# Financial Loss (in Million $)
-# Number of Affected Users
-# Attack Source
-# Security Vulnerability Type
-# Defense Mechanism Used
-# Incident Resolution Time (in Hours)
+# Country - ints
+# Year - ints
+# Attack Type - Strings
+# Target Industry - Strings
+# Financial Loss (in Million $) - floats
+# Number of Affected Users - ints
+# Attack Source - Strings
+# Security Vulnerability Type - Strings
+# Defense Mechanism Used - Strings
+# Incident Resolution Time (in Hours) - ints
 
 # print(df["Attack Type"].value_counts())
 # DDoS                 531
@@ -35,6 +52,69 @@ df = pd.read_csv("Global_Cybersecurity_Threats_2015-2024.csv")
 # Germany      291
 # USA          287
 # China        281
+
+def class_test():
+    # Dont know why, the site said so
+    X = df.drop("Financial Loss (in Million $)", axis=1)
+    y = df["Financial Loss (in Million $)"]
+
+    # this is all categorical columns there is
+    categorical_cols = [
+        "Country",
+        "Attack Type",
+        "Target Industry",
+        "Attack Source",
+        "Security Vulnerability Type",
+        "Defense Mechanism Used"
+    ]
+
+    # all numerical columns
+    numerical_cols = [
+        "Year",
+        "Number of Affected Users",
+        "Incident Resolution Time (in Hours)"
+    ]
+
+    # Seems to work, but not sure how yet
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', 'passthrough', numerical_cols),
+            ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+        ]
+    )
+    # same
+    model = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
+    ])
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model.fit(X_train, y_train)
+
+    # show tree
+    rf_model = model.named_steps['regressor']
+    tree = rf_model.estimators_[0]
+
+    plt.figure(figsize=(20, 10))
+    plot_tree(tree,
+            filled=True,
+            feature_names=model.named_steps['preprocessor'].get_feature_names_out(),
+            max_depth=3,
+            fontsize=10)
+    plt.title("Visualization of a Random Forest Tree")
+    plt.show()
+    # --------
+    
+    pred = model.predict(X_test)
+
+    mse = mean_squared_error(y_test, pred)
+    print(f"Mean Squared Error: {mse:.2f}")
+class_test()
+
+def df_des():
+    print(df.describe())
+# df_des()
 
 #print(df.isna().value_counts())
 #3000 false, so should be good
@@ -63,7 +143,7 @@ def uk_attacks():
     uk = uknum.groupby("Defense Mechanism Used")["Attack Type"].value_counts()
     print(uk)
     print("\n")
-uk_attacks()
+# uk_attacks()
 
 # which country has the biggest loss? - UK
 def fin_loss():
@@ -88,4 +168,39 @@ def Atk_time():
 def atk_overall():
     over = df.groupby("Attack Type")["Country"].value_counts()
     print(over)
-atk_overall()
+# atk_overall()
+
+# has there been 
+
+
+
+# SHAP Values Training
+# https://www.kaggle.com/code/vikumsw/explaining-random-forest-model-with-shapely-values
+# yeah fuck that for now
+def shap_tree():
+    rng = np.random.RandomState(0)
+
+    # get_dummies makes 
+    # print(pd.get_dummies(df["Attack Type"]))
+    
+    
+    
+    X = df[["Incident Resolution Time (in Hours)", "Financial Loss (in Million $)"]]
+    Y = df["Year"]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
+    
+    model = RandomForestClassifier(random_state=rng)
+    model.fit(X_train, y_train)
+    # preds = model.predict(X_test)
+    # test_report = classification_report(y_test, preds)
+    # print(test_report)
+
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_test)
+    # print(shap_values)
+    shap.initjs()
+    # shap.summary_plot(shap_values, X_test)
+    shap.force_plot(explainer.expected_value[1], shap_values[1], choosen_instance)
+# shap_tree()
+
+# print(is_column_float("Incident Resolution Time (in Hours)"))
