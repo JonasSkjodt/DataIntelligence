@@ -114,6 +114,7 @@ def discoveries_over_time():
     # Group by year and count discoveries
     yearly_discoveries = df['discovery_year'].value_counts().sort_index()
     print(yearly_discoveries)
+    
     # Plot
     plt.figure(figsize=(12, 6))
     yearly_discoveries.plot(kind='bar', color='skyblue')
@@ -136,8 +137,8 @@ def discoveries_over_time():
     plt.show()
 
 # 2014 and 2016 has a lot of discoveries, what were the detections methods used here?
-# the print shows how the detection method "Transit" was used a lot in 2014 and 2016.
-# Transit is a method from the Kepler Space Telescope.
+# the print shows how the detection method "Transit" (kepler) was used a lot in 2014 and 2016.
+# checks also to see if the discovered exoplanets name contains kepler.
 def check_2014_2016_discoveries():
     # Filter for 2014 and 2016
     df_2014 = df[df['discovery_year'] == 2014]
@@ -269,4 +270,4 @@ def planet_type_vs_orbital_period():
 # did_technology_enhance_ability_to_see_exoplanets()
 # common_detection_methods()
 # method_vs_planet_type()
-planet_type_vs_orbital_period()
+# planet_type_vs_orbital_period()
