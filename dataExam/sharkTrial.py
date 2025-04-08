@@ -18,12 +18,3 @@ df = pd.read_csv('shark-incidents.csv')
 print(df.describe)
 
 # whats the underlying tendencies of the people who are injured by sharks?
-
-# skeleton of exam report:
-
-
-# introduction
-# loading and overview
-### explain the steps i do and why ive used the blocks of code.
-# exploration of the data
-### motivate, then show plot (data), then interpret data
