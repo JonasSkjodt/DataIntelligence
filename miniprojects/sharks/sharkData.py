@@ -23,18 +23,18 @@ import matplotlib.pyplot as plt
 # - Sex: The gender of the human involved in the incident
 # - Age: The age of the human involved in the incident
 # - Injury: A textual description of the resulting injury to the human
-# - Unnamed: 11: Unexplained data
+# - Unnamed: 11: Unexplained data                                           - Removed 
 # - Time: Time of day of the incident
 # - Species: Species of the shark involved in the incident
 # - Source: Source of the reporting of the incident
-# - pdf: Filename of the report of the incident
-# - href formula: Links to reports, no longer functional
-# - href: Same as above
+# - pdf: Filename of the report of the incident                             - Removed
+# - href formula: Links to reports, no longer functional                    - Removed
+# - href: Same as above                                                     - Removed
 # - Case Number: Internal reference
 # - Case Number.1: Same as above
 # - original order: Ordering in the original system
-# - Unnamed: 21: Unknown data                                       - Removed
-# - Unnamed: 22: Unknown data                                       - Removed
+# - Unnamed: 21: Unknown data                                               - Removed
+# - Unnamed: 22: Unknown data                                               - Removed
 # - fatal: Whether the incident resulted in the human dying
 
 df = pd.read_csv("dataExam/shark-incidents.csv")
@@ -61,5 +61,17 @@ def check_Unamed_nan():
 # removes column which are almost not used
 df = check_Unamed_nan()
 
-# print(df["href"].value_counts())
 
+def check_href():
+    # print(df["href"].value_counts())
+    # print(df["href formula"].value_counts())
+    return df.drop(columns=["href", "href formula"])
+df = check_href()
+
+def check_pdf():
+    print(df["pdf"].isna().value_counts())
+    return df.drop(columns=["pdf"])
+    
+df = check_pdf()
+
+print(df)
