@@ -70,8 +70,5 @@ df = check_href()
 
 def check_pdf():
     print(df["pdf"].isna().value_counts())
-    return df.drop(columns=["pdf"])
-    
+    return df.drop(columns=["pdf"]) 
 df = check_pdf()
-
-print(df)
