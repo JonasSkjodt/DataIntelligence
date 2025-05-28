@@ -21,6 +21,7 @@ citizens.
 - income_bracket: Whether the person earns more or less than 50.000 USD
   a year
 
+
 ## dolphins.csv
 Data on dolphin behaviour in a narrow seaport.
 
